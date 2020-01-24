@@ -1,0 +1,655 @@
+---
+title: "flotte Tunisair"
+subtitle: "Iheb JRIDI " 
+output: html_document
+---
+
+#**Plan**
+## 1- Compr?hension m?tier
+
+## 2-  Compr?hension des donn?es
+
+## 3- Pr?paration des donn?es
+
+## 4- Mod?lisation
+
+## 5- Evaluation
+
+## 6- Conclusion et Perspectives
+
+
+
+#  **1-Compr?hension m?tier: **
+
+## Business objectives:
+
+##### - Est-ce que la flotte actuelle de Tunisair r?pond aux exigences internationales ? 
+##### - Peut-on affirmer que les mod?les disponibles dans la compagnie tunisienne joignent les normes standards favorisant la concurrence sur l'?chelle r?gionale et/ou internationale ?
+##### - Comment peut-on cat?goriser une telle panoplie de mod?les d'avions ?
+##### - Quel est le profil typique des avions dans le monde ?
+
+## Data Science goals:
+#### Etudier les caract?ristiques de la flotte Tunisair et des compagnies a?riennes internationales.
+#### Cat?goriser les mod?les d'avions.
+#### D?terminer le profil standard international des avions.  
+
+
+#  **2-Compr?hension des donn?es: **
+
+##Importation des donn?es
+Dans cette partie, On va utiliser le fichier delta.csv qui nous a ?t? fourni.Ce dernier, regroupe les  avions du monde entier appartenant ? des compagnies a?riennes diff?rentes.
+```{r setup, include=FALSE}
+delta = read.table(file = 'delta.csv', header= T ,sep = "," ,dec = "." , na.string = "" ) 
+```
+
+```{r cars}
+dim(delta)
+```
+
+
+
+```{r pressure, echo=FALSE}
+names(delta)
+```
+```{r a }
+ 
+str(delta) 
+```
+
+###Les mots cl?s:
+#### Dans cette partie on va pr?senter une petite explication des differentes variables de notre fichier delta.csv. 
+#####"Seat.Width..Club." : c'est la largueur des sieges dans un club.
+#####"Seat.Pitch..Club." : c'est la hauteur des sieges dans un club.
+#####"Seat..Club." : c'est le nombre de sieges dans un  club.
+#####"Seat.Width..First.Class." : c'est la largueur des sieges dans la Premier Classe. 
+#####"Seat.Pitch..First.Class.": c'est la hauteur des sieges dans la Premier Classe.
+#####"Seats..First.Class." : c'est le nombre de sieges dans la Premier Classe.
+#####"Seat.Width..Business." : c'est la largueur des sieges dans la Classe Affaire.
+#####"Seat.Pitch..Business." c'est la hauteur des sieges dans la Classe Affaire.
+#####"Seats..Business." : c'est le nombre de sieges dans la Classe Affaire.
+#####"Seat.Width..Eco.Comfort." : c'est la largueur des sieges dans la Classe Eco Confort.
+#####"Seat.Pitch..Eco.Comfort.": c'est la hauteur des sieges dans la Classe Eco Confort.
+#####"Seats..Eco.Comfort." : c'est le nombre de sieges dans la Classe Eco Confort.
+#####"Seat.Width..Economy." : c'est la largueur des sieges dans la Classe Economique.
+#####"Seat.Pitch..Economy." c'est la hauteur des sieges dans la Classe Economique.
+#####"Seats..Economy." : c'est le nombre de sieges dans la Classe Economique.
+#####"Accommodation": c'est le nombre de siege total.
+#####"Cruising.Speed..mph." : c'est la vitesse de croisiere.  
+#####"Range..miles." :c'est la  distance  parcourue.
+#####"Engines" :  c'est le nombre de moteur
+#####"Wingspan..ft." : c'est l'envergure,
+#####"Tail.Height..ft." : c'est la hauteur de l'empennage arri?re.
+#####"Length..ft." : c'est la longueur.
+#####"Wifi" : si l'avion dispose du wifi alors 1:oui sinon 0:non
+#####"Video" : si l'avion dispose de lecteur video alors 1:oui sinon 0:non
+#####"Power" : si l'avion dispose de charge alors 1:oui sinon 0:non
+#####"Satellite" : si l'avion dispose d'un satellite alors 1:oui sinon 0:non
+#####"Flat.bed" : si l'avion dispose de siege ajustable alors 1:oui sinon 0:non
+#####"Sleeper" : si l'avion dispose de cabine personnelle alors 1:oui sinon 0:non
+#####"Club" : si l'avion dispose d'un club alors 1:oui sinon 0:non
+#####"First.Class" : si l'avion dispose d'une Premiere Classe alors 1:oui sinon 0:non
+#####"Business" : si l'avion dispose d'une Classe Affaire alors 1:oui sinon 0:non
+#####"Eco.Comfort" : si l'avion dispose d'une Classe Eco Confort alors 1:oui sinon 0:non
+#####"Economy" : si l'avion dispose d'une Classe Economique alors 1:oui sinon 0:non
+```{r}
+```
+
+###Extraction des donn?es de tunisair:
+
+```{r j}
+tn = delta[which((delta$Aircraft == "Airbus A319")|(delta$Aircraft == "Airbus A330-200")|(delta$Aircraft == "Airbus A320")|(delta$Aircraft == "Boeing 737-700 (73W)")),]
+tn
+
+```
+
+
+```{r o}
+ 
+boxplot(tn,col="red")
+```
+On peut remarqu? que les variables prennent des valeurs tr?s diff?rentes.
+```{r}
+
+business=tn[which(tn$Seats..Business.>0),]
+business$Aircraft
+```
+On remarque que l'Airbus A330-200 est le seul type d'avion de Tunisair qui a une Classe Affaire . 
+
+
+```{r}
+avionVPS=tn[which(tn$Video>0 & tn$Power>0 & tn$Satellite>0 ),] 
+avionVPS$Aircraft
+
+```
+On remarque que L'Airbus Boeing 737-700 est le seul avion de Tunisair qui a des ecrans video, power et satellite.
+```{r}
+economy=tn[which(tn$Seats..Economy.>0),]
+economy$Aircraft
+```
+L'Airbus A319, L'Airbus A320,L'Airbus A330-200 et Boeing 737-700 (73W) sont les avions qui possedent des Classes Economiques. 
+```{r}
+economy[(which.max(economy$Seats..Economy.)),]
+```
+l'Airbus A330-200 est l'avion qui comporte le plus de sieges dans sa Classe Economie.
+
+```{r}
+
+tn[which.max(tn$Accommodation),]
+```
+
+l'Airbus A330-200, est l'avion qui comporte le plus nombre de si?ges.
+```{r}
+mean(tn$Cruising.Speed..mph.)
+```
+On remarque que la vitesse moyenne des avions de Tunisair est de 520.5 mph
+```{r}
+mean(tn$Range..miles.) 
+```
+
+On remarque que La distance moyenne des avions de Tunisair est de 3570 miles
+
+```{r}
+
+```
+
+###Exploration graphique des donn?es de Tunisaire 
+```{r}
+library(FactoMineR)
+tunisairacp=PCA(tn[,c(2:34)],quanti.sup=22:33)
+```
+On remarque que la  panoplie en Economy class et en Business Class est importante ,Moyenne panoplie en Accomodation, Wingspan et  Faible panoplie en Vid?o,Sleeper, Power, Satellite et Flat-bed et First.Class.
+
+
+
+
+
+Pour ?tudier l'exigence de l'?ge on va extraire des donn?es ? partir de https://www.airfleets.fr 
+
+```{r}
+library('rvest') #Scraping
+library('stringr')# Manipulation des chaines de caract?res
+library('ggplot2')
+
+# L'age et le classement d'age des avions de Tunisair
+url_tun <- 'https://www.airfleets.fr/ageflotte/tunisair.html'
+
+webpage_tun <- read_html(url_tun)
+age_data_html_tun <- html_nodes(webpage_tun,'.soustitre+ table table td')
+
+#Converting the ranking data to text
+age_data_tun <- html_text(age_data_html_tun)
+a = as.data.frame(matrix(age_data_tun[-1:-4],ncol = 4,byrow = T))
+colnames(a) <- age_data_tun[1:4]
+a
+```
+
+Pour ?tudier la concurrence de Tunisair sur l'?chelle r?gionale et affirmer que les mod?les disponibles dans la compagnie tunisienne joignent les normes standards on a converti un fichier 
+fleetdata.csv ? partir de cette source https://www.kaggle.com/traceyvanp/airlinefleet/data en un fichier fleetdata.xlsx.
+
+
+
+# **3-Pr?paration des donn?es: **
+
+Pour appliquer la modelisation,il est necessaire de transformer toutes les variables qualitatives en des variables quantitatives. En effet, on a ajust? nos donn?es avec la m?thode SCALE. 
+
+
+```{r}
+scaled_data = as.matrix(scale(delta[,c(2:34)]))
+set.seed(123)
+boxplot(scaled_data , col="blue")
+```
+
+Dans cette phase, on va construire une data frame qui englobe Tunisair et les autres compagnies comme: Lufthansa,KLM,Egyptair ... afin d'avoir une vision sur l'age des avions de la flotte de Tunisair par rapport aux autres compagnies.
+
+```{r}
+#liste des compagnies ? comparer avec Tunisair
+companies <- c("lufthansa","klm","delta%20air%20lines","air%20france","egyptair")
+
+liste_age = list()
+for (i in companies){
+url <- paste('https://www.airfleets.fr/ageflotte/',i,'.html',sep = "")
+
+webpage <- read_html(url)
+age_data_html <- html_nodes(webpage,'.soustitre+ table table td')
+
+#Converting the ranking data to text
+age_data <- html_text(age_data_html)
+age_comp <- as.data.frame(matrix(age_data[-1:-4],ncol = 4,byrow = T),stringsAsFactors = F)
+colnames(age_comp) <- age_data[1:4]
+liste_age <- append(liste_age,as.data.frame(age_comp))
+
+
+}
+#Conversion des listes dans des data frame
+lufthansa <- as.data.frame(liste_age[1:4])
+klm <- as.data.frame(liste_age[5:8])
+delta1 <- as.data.frame(liste_age[9:12])
+air_france <- as.data.frame(liste_age[13:16])
+egyptair <- as.data.frame(liste_age[17:20])
+
+#lab?lisation des dataframe
+tunisair<-cbind(a,Label = rep("tunisair", times = 7))
+lufthansa <- cbind(lufthansa,Label = rep("lufthansa",times = 11))
+klm <- cbind(klm,Label = rep("klm", times = 6))
+delta1 <- cbind(delta1,Label = rep("delta1", times = 12))
+air_france <- cbind(air_france,Label = rep("air_france",times = 10))
+egyptair <- cbind(egyptair, Label = rep("egyptair", times = 7))
+colnames(tunisair) <- colnames(lufthansa)
+
+#unification des donn?es
+df_age <- as.data.frame(rbind(lufthansa,klm,delta1,air_france,egyptair,tunisair))
+#conversion d'age et nombre en numeric
+df_age$Age <- as.numeric(gsub("[a-zA-Z ]", "", df_age$Age))
+df_age$Nombre <-as.numeric(df_age$Nombre)
+
+df_age
+
+```
+
+
+
+##**4- Mod?lisation:**
+
+###Plot des nombres d'avions par compagnie:
+
+
+
+```{r}
+
+tot <- df_age[which(df_age$Appareil =="TOTAL"),]
+
+tot %>% ggplot(aes(x = .$Label, y =c(297,120,886,208,55,29)  ))+
+  geom_col(aes(fill=tot$Label)) + 
+  labs(title = "Nombre d'avions par compagnie",x = "Airline", y = "Nombre d'avions",colour = "Label")
+```
+On remarque que l'effectif de la flotte de Tunisair est peu nombreux par rapport ? Delta (886 avions). Et r?gionalement Egyptair a presque deux fois le nombre d'avions que Tunisair.
+
+
+##Plot des moyenne d'age par compagnie
+```{r}
+tot %>% ggplot(aes(x = .$Label, y = .$Age)) +
+  geom_col(aes(fill=tot$Label)) + 
+  labs(title = "Moyenne d'age des flottes par compagnie",x = "Airline", y = "Moyenne d'Age",colour = "Label")
+
+```
+Ici, la moyenne d'age de la flotte de Tunisair est relativement haute par rapport aux autres compagnies.Mais ?a reste dans les normes en consid?rant l'effectif et la diversit? d'autres compagnies.
+
+
+##Plot des classement pour Tunisair par mod?le:
+```{r}
+
+classement <- list()
+#extraction des classement
+classement <- str_extract_all(tunisair$Position.pour.l.age.par.type.d.appareil, "[0-9]+")[-7]
+nb_total_modele <- vector()
+classement_modele <- vector()
+for (i in 1:6 )
+{
+  nb_total_modele <- c(nb_total_modele,classement[[i]][1])
+  classement_modele <- c(classement_modele,classement[[i]][2])
+}
+
+
+# Dataframe repr?sentant le classement de chaque avions par age
+tunisair_df <- as.data.frame(cbind(nb_total = nb_total_modele,classemeent = classement_modele))
+tunisair_df$nb_total <- as.numeric(as.character(tunisair_df$nb_total))
+tunisair_df$classemeent <- as.numeric(as.character(tunisair_df$classemeent))
+tunisair_df
+
+#Plot
+tunisair_df %>%ggplot(aes(x = tunisair$Appareil[-7], y =tunisair_df$nb_total,fill = .$classemeent)) +
+  geom_col()+
+  scale_fill_gradient(name = "Classement",low = "blue", high = "red")+
+  labs(title = "Classement des mod?les d'avions dans le monde",x = "Mod?les", y = "Moyenne d'Age",colour = "Label")
+
+
+```
+Pour le classement, les mod?les Airbus A330 et le mod?le MD-80/90 sont relativement neufs.
+Par contre, les mod?les Boeing 737 et Airbus A320 sont parmis les mod?les d'avions les plus anciens dans le monde.
+##  la concurrence de Tunisair sur l'?chelle r?gionale:
+
+Dans cette partie on a essayer de travailler avec l'outil Tableau afin de mod?liser les mod?les d'avions existant dans les compagnies tunisair,Royal marroc, Air Algerie et egypt air en ?tudiant le  cout unitaire et le nombre d'avions  pour chaque mod?le
+####Unit cost per Aircraft type:
+![](C:\Users\AMAL\Desktop\cout.png)
+
+a partir de ce tableau on a repr?sent? le prix unitaire de chaque mod?le d'avion se trouvant dans les compagnies tunisair, Royal marroc, Air Algerie et egypt air.On a pu constater en ?tudiant ce graphique que la compagnie tunisair poss?de le prix unitaire le plus faible pour les diff?rents mod?les d'avions. 
+
+#### Number of planes per Aircraft Type:
+![](C:\Users\AMAL\Desktop\number.png)
+
+A partir de ce tableau on peut trouver le nombre d'avions disponibles pour chaque mod?le d'avion pour chaque compagnie. En calculant le nombre d'avions disponibles pour chaque compagnie (c'est la somme des avions de chaque mod?le appartenant ? sa compagnie), on a pu constater que qune le nombre d'avions pour la compagnie Tunisair est :33,le nombre d'avions pour la compagnie air Alg?rie est: 56,
+Le nombre d'avions pour la compagnie Royal Maroc est :57, le nombre d'avions pour la compagnie Egypte air:73. On peut conclure que Tunisair poss?de un nombre d'avions limit? par rapport les autres compagnies r?gionale.
+
+
+###K-means
+Dans cette partie,on a utilis? k-means.En effet, K-means n?c?ssite une connaisance de param?tre k ( le nombre de cluster) on essaye donc de trouver le nombre optimal de clusters et on a choisi de repeter ce processus 15 fois.
+
+```{r}
+k.max <- 15
+data <- scaled_data
+wss <- sapply(1:k.max, 
+              function(k){kmeans(data, k, nstart=50,iter.max = 15 )$tot.withinss})
+wss
+plot(1:k.max, wss,
+     type="b", pch = 19, frame = FALSE, 
+     xlab="Number of clusters K",
+     ylab="Total within-clusters sum of squares")
+
+```
+
+D'apres ce plot le meilleur k qu'on peut avoir est k=3.
+```{r}
+grp_delta = kmeans(delta[,c(2:34)],centers = 3)
+grp_delta
+c=table(delta$Aircraft , grp_delta$cluster)
+c
+
+d=table(grp_delta$cluster)
+d
+```
+
+```{r}
+print(grp_delta)
+library(cluster)
+ clusplot(delta[,c(2:34)], grp_delta$cluster, lines = 0, color= T, shade= T,
+         main = paste('k-means'))
+```
+
+### CAH 
+La classification ascendante hi?rarchique (CAH): son principe est de rassembler des individus selon un crit?re de ressemblance d?fini au pr?alable qui s'exprimera sous la forme d'une matrice de distances, exprimant la distance existant entre chaque individu pris deux ? deux. Deux observations identiques auront une distance nulle. Plus les deux observations seront dissemblables, plus la distance sera importante.
+```{r}
+d <- dist(delta[,c(2:34)], method = "euclidean")
+hc <- hclust(d , method = "average")
+plot (hc)
+
+```
+
+```{r}
+gpe_cah = cutree(hc ,3)
+table(gpe_cah)
+print(gpe_cah)
+
+
+```
+```{r}
+library(cluster)
+ clusplot(delta[,c(2:34)], gpe_cah,  lines = 0, color= T, shade= T,
+         main = paste('CAH'))
+
+```
+```{r}
+plot(gpe_cah)
+```
+      
+         
+### PAM :
+similaire ? K-means, car les deux sont des algorithmes qui consiste ? segmenter l'ensemble de donn?es en groupes
+```{r}
+library("cluster")
+gpe_pam <- pam(delta[,c(2:34)], 3)
+print (gpe_pam)
+ 
+```
+```{r}
+
+table(gpe_pam$clustering)
+```
+
+```{r}
+clusplot(delta[,c(2:34)], gpe_pam$clustering,  lines = 0, color= T, shade= T,
+         main = paste('PAM'))
+```
+
+###les differents Clusters:
+```{r}
+tab = cbind(delta, Cluster=gpe_cah)
+cluster1 = tab[which(tab$Cluster == 1), ]
+cluster2 = tab[which(tab$Cluster == 2), ]
+cluster3 = tab[which(tab$Cluster == 3), ]
+ 
+```
+le 1 er cluster:
+```{r}
+cluster1
+```
+
+```{r}
+cluster1
+moyenneCluster1= colMeans(cluster1[,c(2:34)] , na.rm = T)
+for (i in 23:33)
+{
+  if(moyenneCluster1[i]<0.5)
+  {
+    moyenneCluster1[i]=0
+  }
+  else
+  {
+    moyenneCluster1[i]=1
+  }
+}
+moyenneCluster1
+
+```
+Les si?ges du cluster 1 sont r?parties comme suit : 
+* 103 Economy.
+* 15 Eco Comfort.
+* 15 First Class.
+En effet, ce mod?le est caract?ris? par une moyenne de "Accommodation" (logement) ?gale ? 132.8214, une distance moyenne ?gale ? 2374.929 par un envergure (Wingspan) ?gale ? 107.3617, une longueur ?gale ? 127.1124, une hauteur de queue ?gale ? 35.70786 et par 2 moteurs. Ce mod?le ne dispose pas de cabine personnelle, stellite et du club  mais il exige la pr?sence d'une connexion wifi.
+```{r}
+tn_cluster1 = cluster1[which((cluster1$Aircraft == "Airbus A319")|(cluster1$Aircraft == "Airbus A330-200")|(cluster1$Aircraft == "Airbus A320")|(cluster1$Aircraft == "Boeing 737-700 (73W)")),]
+tn_cluster1
+```
+
+=> Les trois modeles Airbus A319 , Airbus A320 et Boeing 737-700  de Tunisair appartiennet a ce cluster. 
+
+```{r}
+cluster2
+moyenneCluster2= colMeans(cluster2[,c(2:34)] , na.rm = T)
+for (i in 23:33)
+{
+  if(moyenneCluster2[i]<0.5)
+  {
+    moyenneCluster2[i]=0
+  }
+  else
+  {
+    moyenneCluster2[i]=1
+  }
+}
+moyenneCluster2
+```
+Les si?ges du cluster 2 sont r?parties comme suit : 
+* Economy (174)
+* Eco.Comfort (31) 
+* Business (28) 
+En effet, ce mod?le est caract?ris? par une moyenne de "Accommodation" (logement) ?gale ? 238.071429, une distance moyenne ?gale ? 6058.142857 par une envergure (Wingspan) ?gale ? 170.094143, une longueur ?gale ? 187.154286, une hauteur de queue ?gale ? 53.627043 et par 2 moteurs. Ce mod?le n'exige pas la presence du wif , Satellite,cabine personnelle ,   mais il exige la pr?sence de video et de l'?lectricit?.
+
+```{r}
+tn_cluster2 = cluster2[which((cluster2$Aircraft == "Airbus A319")|(cluster2$Aircraft == "Airbus A330-200")|(cluster2$Aircraft == "Airbus A320")|(cluster2$Aircraft == "Boeing 737-700 (73W)")),]
+tn_cluster2
+```
+
+Airbus A330-200 de Tunisair appartient ? ce cluster.
+```{r}
+
+cluster3
+moyenneCluster3= colMeans(cluster3[,c(2:34)] , na.rm = T)
+for (i in 23:33)
+{
+  if(moyenneCluster3[i]<0.5)
+  {
+    moyenneCluster3[i]=0
+  }
+  else
+  {
+    moyenneCluster3[i]=1
+  }
+}
+moyenneCluster3
+```
+Les si?ges du cluster 3 sont r?parties comme suit :
+1. Economy (188)
+2. Business (28) 
+3. Eco.Comfort (36) 
+
+En effet, ce mod?le est caract?ris? par une moyenne de "Accommodation" (logement) ?gale ? 269, une distance moyenne ?gale ? 9458.5 par un envergure (Wingspan) ?gale ? 212.583, une longueur ?gale ? 209.083 , une hauteur de queue ?gale ? 61.330 et par 2 moteurs. Ce mod?le ne dispose pas de Satellite , Wifi mais il exige la pr?sence de vid?o et de flat bed  et de l'?lectricit? , cabine personnelle .
+
+```{r}
+tn_cluster3 = cluster3[which((cluster3$Aircraft == "Airbus A319")|(cluster3$Aircraft == "Airbus A330-200")|(cluster3$Aircraft == "Airbus A320")|(cluster3$Aircraft == "Boeing 737-700 (73W)")),]
+tn_cluster3
+```
+On remarque que aucun mod?le de Tunisair appartient ? ce cluster.
+
+###La distribution:
+
+
+```{r}
+par(mfrow=c(1,4))
+b1=cluster1[,8:10]
+boxplot(b1, col="red")
+b2=cluster2[,8:10]
+boxplot(b2,col="blue")
+b3=cluster3[,8:10]
+boxplot(b3,col="yellow")
+b4=tn[,8:10]
+boxplot(b4, col="green")
+```
+Dans cette partie on va ?tudier la distribution des diff?rentes variables du Bisness Class. 
+D'apr?s les Boxplots On peut d?duire que le cluster3 est le meilleur suivi du cluster 2, du celui de Tunisair et du cluster1 du point de vue largeur du si?ge, hauteur du si?ge et nombre de si?ge. On peut Conclure aussi que Tunisair conforme au cluster 1 dans ce crit?re.
+
+```{r}
+par(mfrow=c(1,4))
+b1=cluster1[,14:16]
+boxplot(b1, col="red")
+b2=cluster2[,14:16]
+boxplot(b2,col="blue")
+b3=cluster3[,14:16]
+boxplot(b3,col="yellow")
+b4=tn[,14:16]
+boxplot(b4, col="green")
+```
+Dans cette partie on va ?tudier la distribution des diff?rentes variables du Economy Class. 
+D'apr?s les Boxplots On peut d?duire que le cluster3 est le meilleur suivi du cluster 2, du cluster 1 et  du celui de Tunisair du point de vue largeur du si?ge, hauteur du si?ge et nombre de si?ge. On peut Conclure aussi que Tunisair conforme plus au cluster 1 dans ce crit?re.
+
+
+```{r}
+par(mfrow=c(1,4))
+b1=cluster1[,17]
+boxplot(b1, col="red")
+b2=cluster2[,17]
+boxplot(b2,col="blue")
+b3=cluster3[,17]
+boxplot(b3,col="yellow")
+b4=tn[,17]
+boxplot(b4, col="green")
+```
+Dans cette partie on va ?tudier la distribution de la variable accomodation. 
+D'apr?s les Boxplots On peut d?duire que le cluster3 est le meilleur suivi du cluster 2, du cluster 1 et  du celui de Tunisair du point de vue largeur du si?ge, hauteur du si?ge et nombre de si?ge. On peut Conclure aussi que Tunisair conforme plus au cluster 1 dans ce crit?re.
+
+```{r}
+par(mfrow=c(1,4))
+b1=cluster1[,18]
+boxplot(b1, col="red")
+b2=cluster2[,18]
+boxplot(b2,col="blue")
+b3=cluster3[,18]
+boxplot(b3,col="yellow")
+b4=tn[,18]
+boxplot(b4, col="green")
+```
+Dans cette partie on va ?tudier la distribution de la variable Cruising Speed 
+D'apr?s les Boxplots On peut d?duire que le cluster3 est le meilleur suivi du cluster 1, du cluster 2 et  du celui de Tunisair du point de vue cursing speed. On peut Conclure aussi que Tunisair conforme plus au cluster 2 dans ce crit?re.
+
+
+```{r}
+
+```
+
+#### le profil typique des avions: 
+
+La majorit? des avions sont class?s dans le 1 er cluster  d'o? ce dernier repr?sente le profil typique.
+```{r}
+c=delta[,2:34]
+d=dist(c,method = "euclidean")
+hc=hclust(d,method="average")
+plot(hc)
+```
+```{r}
+
+gpe_cah=cutree(hc,3)
+
+barplot(table(gpe_cah))
+```
+
+```{r}
+table(gpe_cah)
+cluster1=data.frame()
+n=length(gpe_cah)
+for(i in 1:n) {
+  if(gpe_cah[i]==1)
+     {
+      cluster1=rbind(cluster1,delta[i,])
+     }
+}
+cluster1$Aircraft
+
+```
+
+cluster1:
+```{r}
+
+moyenneCluster1= colMeans(cluster1[,c(2:34)] , na.rm = T)
+moyenneCluster1
+```
+
+ 
+ 
+
+```{r}
+moyenneCluster1[23:33]
+```
+ 
+On va ajuster les variables qualitatives pour determiner le profil le plus typique des avions.
+```{r}
+for (i in 23:33)
+{
+  if(moyenneCluster1[i]<0.5)
+  {
+    moyenneCluster1[i]=0
+  }
+  else
+  {
+    moyenneCluster1[i]=1
+  }
+}
+moyenneCluster1
+```
+Comme le cluster1 repr?sente le mod?le typique , alors ce dernier est caract?ris? par
+Les si?ges sont r?parties comme suit : 
+* 103 Economy.
+* 15 Eco Comfort.
+* 15 First Class.
+En effet, ce mod?le est caract?ris? par une moyenne de "Accommodation" (logement) ?gale ? 132.8214, une distance moyenne ?gale ? 2374.929 par une envergure (Wingspan) ?gale ? 107.3617, une longueur ?gale ? 127.1124, une hauteur de queue ?gale ? 35.70786 et par 2 moteurs. Ce mod?le ne dispose pas de cabine pour dormir  non plus de vid?o, pas  du Business class il  et sans Satellite mais il exige la pr?sence d'une connexion wifi et de l'?lectricit?.
+
+=> Tunisair possede 3 modeles typiques
+
+
+
+#   **5-Evaluation:**
+
+
+Dans cette partie, On passe ? la r?vision des data science goals : Notre modalisation respecte les objectifs m?tier qu'on a d?j? pr?ciser.
+
+#  **6-Conclusion et Perspectives: **
+
+Apres l'?tude des exigences et des normes (?ge , taille , cout .) des flottes r?gionales et internationales , on a constat? que la flotte de Tunisair respecte les normes d'?ge et cout mais en terme de nombre d'effectif , la flotte de Tunisair se distingue par sa taille r?duite. 
+
+
+En se basant sur les analyses r?alis?es le profil typique des avions se r?sume essentiellemt autour du confort, de point de vue passager cherchant une bonne qualit? d?finit par : une connexion wifi, l'?lectricit? n?cessaire et la disponibilit? de TV/vid?o.
+
+
+Nous pouvons remarquer que la flotte tunisaire propose un minimum de choix des classes, seulement "First Class", "Eco Comfort" et "Economy." pour leurs clients. Donc la Flotte de tunisair diminue ces chances par rapport ? ses concurrents internationaux qui pr?sente une diversit? de classe. 
+
+
+Donc selon notre ?tude on propose que Tunisair ajoute ? sa flotte des avions qui dispose de diff?rentes classes comme Airbus A330 , Airbus A321 (321) V1. D'ailleurs la compagnie a?rienne nationale ? Tunisair ? est en phase de n?gociations avec le constructeur a?ronautique europ?en ?Airbus?, et ce, dans le but d'avancer le d?lai de livraison de cinq avions de cat?gorie A330  avant l'ann?e 2020.
+
